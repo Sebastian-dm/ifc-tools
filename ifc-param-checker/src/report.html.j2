@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>IFC Rule Check Report</title>
+  <style>
+    body{font-family:system-ui,Arial,sans-serif;margin:24px;}
+    .kpis{display:flex;gap:16px;margin-bottom:16px}
+    .kpi{padding:12px 14px;border:1px solid #ddd;border-radius:10px}
+    table{border-collapse:collapse;width:100%;}
+    th,td{border:1px solid #eee;padding:8px 10px;text-align:left}
+    th{background:#fafafa}
+    .fail{color:#b00020;font-weight:600}
+    .warn{color:#9f6000;font-weight:600}
+    .pass{color:#006400}
+    footer{margin-top:24px;color:#666;font-size:12px}
+  </style>
+</head>
+<body>
+  <h1>IFC Rule Check Report</h1>
+  <div class="kpis">
+    <div class="kpi">Files: {{ summary.files }}</div>
+    <div class="kpi">Objects checked: {{ summary.objects_checked }}</div>
+    <div class="kpi">Violations: {{ summary.violations }}</div>
+    <div class="kpi">Warnings: {{ summary.warnings }}</div>
+    <div class="kpi">Passes: {{ summary.passes }}</div>
+  </div>
+
+  <h2>By Rule</h2>
+  <table>
+    <thead>
+	<tr>
+		<th>Rule</th>
+		<th>Title</th>
+		<th>Checked</th>
+		<th>Pass</th>
+		<th>Warn</th>
+		<th>Fail</th>
+	</tr>
+	</thead>
+    <tbody>
+      {% for rid, r in by_rule.items() %}
+      <tr>
+        <td>{{ rid }}</td>
+        <td>{{ r.title }}</td>
+        <td>{{ r.checked }}</td>
+        <td class="pass">{{ r.pass }}</td>
+        <td class="warn">{{ r.warn }}</td>
+        <td class="fail">{{ r.fail }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+    <h2>Unique Values by Property</h2>
+  <table>
+    <thead>
+	<tr>
+		<th>Rule and Property</th>
+		<th>Passing Values</th>
+		<th>Failing Values</th>
+	</tr>
+	</thead>
+    <tbody>
+      {% for key, vals in prop_values.items() %}
+      <tr>
+        <td>{{ key }}</td>
+        <td>{{ vals.pass | sort | join(", ") }}</td>
+        <td>{{ vals.fail | sort | join(", ") }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Violations</h2>
+  <table>
+    <thead><tr>
+      <th>File</th>
+	  <th>Rule</th>
+	  <th>Entity</th>
+	  <th>GlobalId</th>
+      <th>Name</th>
+	  <th>Property</th>
+      <th>Expected</th>
+	  <th>Actual</th>
+	  <th>Severity</th>
+    </tr></thead>
+    <tbody>
+      {% for v in violations %}
+      <tr>
+        <td>{{ v.file }}</td>
+        <td>{{ v.rule }}</td>
+        <td>{{ v.entity }}</td>
+        <td>{{ v.globalId }}</td>
+        <td>{{ v.name or '' }}</td>
+        <td>{{ v.property }}</td>
+        <td><pre style="white-space:pre-wrap;margin:0">{{ v.expected }}</pre></td>
+        <td><pre style="white-space:pre-wrap;margin:0">{{ v.actual }}</pre></td>
+        <td class="{{ v.severity }}">{{ v.severity }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <footer>
+    Generated: {{ meta.timestamp }} · Tool: {{ meta.tool_version }} · Rules hash: {{ meta.rules_hash }}
+  </footer>
+</body>
+</html>
